@@ -1,0 +1,27 @@
+site_name: Vibe C2 Docs
+site_description: Product and technical documentation for the Vibe C2 project
+site_url: https://wooderan.github.io/vibe-c2-docs/
+repo_url: https://github.com/Wooderan/vibe-c2-docs
+repo_name: Wooderan/vibe-c2-docs
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Foundations:
+      - Project Scope: project-scope.md
+      - Tech Requirements: tech-requirements.md
+      - Architecture Draft: architecture.md
+  - ADR:
+      - Overview: adr/README.md
