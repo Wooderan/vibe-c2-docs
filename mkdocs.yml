@@ -30,6 +30,7 @@ nav:
       - Architecture Draft: architecture.md
       - Module Types: module-types.md
       - Message Flow: message-flow.md
+      - Message Contracts: message-contracts.md
       - Future Steps & Ideas: future-steps.md
   - ADR:
       - Overview: adr/README.md
