@@ -23,5 +23,6 @@ nav:
       - Project Scope: project-scope.md
       - Tech Requirements: tech-requirements.md
       - Architecture Draft: architecture.md
+      - Module Types: module-types.md
   - ADR:
       - Overview: adr/README.md
