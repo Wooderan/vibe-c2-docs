@@ -49,3 +49,4 @@ This page tracks planned follow-ups and open ideas that are not yet finalized as
 3. Module lifecycle and compatibility policy.
 4. Error handling and retry semantics.
 5. Observability baseline (logs, metrics, traces).
+6. Implant payload cryptography boundary and key-management policy.

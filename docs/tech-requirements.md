@@ -30,7 +30,14 @@
 - Queue topology must support routing by message type and module responsibility.
 - Critical message flows must support acknowledgements and retry/dead-letter behavior.
 
-## FR-06: Auditability
+## FR-06: Application-Layer Implant Encryption
+
+- Implant-to-C2 payloads must be encrypted at application level end-to-end.
+- Channel modules must not decrypt implant payloads.
+- Channel modules may process only routing metadata (for example: `implant_id`, `session_id`, channel metadata) and encrypted blobs.
+- Core C2 services must resolve key material using routing identifiers and perform decrypt/verify.
+
+## FR-07: Auditability
 
 - Security-relevant actions must be logged with actor, action, and time.
 - Logs must be queryable for incident investigation.
@@ -41,6 +48,8 @@
 ## NFR-01: Security
 
 - All control-plane traffic must use encryption in transit.
+- Implant payload confidentiality/integrity must be enforced with application-layer encryption.
+- Decryption keys must be isolated to core C2 services (not channel modules).
 - Secrets must not be stored in plaintext.
 - Authentication events must be auditable.
 

@@ -13,6 +13,9 @@
 
 - Modules do not call each other directly by default.
 - Core server and modules communicate over RabbitMQ channels.
+- Implant-to-C2 payloads are application-layer encrypted end-to-end.
+- Channel modules do not decrypt implant payloads; they route metadata + encrypted blobs.
+- Only core C2 services hold decryption keys and perform decrypt/verify operations.
 - Messages should be schema-versioned and idempotent where possible.
 - Critical flows should use acknowledgements/retries and dead-letter queues.
 
@@ -32,6 +35,9 @@
 ## Baseline Security Controls
 
 - Encrypted transport for all external/control-plane traffic.
+- Application-layer E2E encryption for implant payloads (`implant` ↔ `core C2`).
+- Decryption keys are available only to core C2 services.
+- Channel modules operate as blind routers for encrypted blobs.
 - RBAC for all operator actions.
 - Queue access control per service/module in RabbitMQ.
 - Strict audit logging for sensitive workflows and module-triggered actions.

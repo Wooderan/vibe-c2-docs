@@ -9,9 +9,10 @@ Channel modules provide communication paths between implants/agents and the core
 ### Responsibilities
 
 - Accept inbound agent traffic from a specific transport/platform.
-- Validate, normalize, and envelope incoming messages.
+- Extract/maintain routing metadata (`implant_id`, `session_id`, channel context).
+- Treat implant payload as opaque encrypted blob (no decrypt/inspect).
 - Publish inbound messages/events to RabbitMQ for core processing.
-- Consume outbound task/response messages from RabbitMQ and deliver them back to agents.
+- Consume outbound encrypted task/response blobs from RabbitMQ and deliver them back to agents.
 - Handle transport-specific concerns (sessions, polling cadence, retries, rate limits).
 
 ### Examples
@@ -25,6 +26,7 @@ Channel modules provide communication paths between implants/agents and the core
 ### Notes
 
 - Keep transport logic isolated from business/tasking logic.
+- Channel modules are blind to implant plaintext by design.
 - Enforce per-channel authentication and abuse controls.
 - Expose channel health and queue lag metrics.
 
@@ -83,6 +85,11 @@ All module types should:
 - Be independently deployable/replaceable in Docker Compose stacks.
 - Emit structured logs and health signals.
 - Support graceful shutdown and idempotent processing where possible.
+
+Crypto boundary rules:
+
+- Implant payload crypto (`encrypt/decrypt/verify/sign`) belongs to core C2 services.
+- Channel modules must be plaintext-blind and process only routing metadata + encrypted blobs.
 
 ## Suggested Next Step
 

@@ -10,30 +10,34 @@ sequenceDiagram
     participant I as Implant
     participant CH as Channel Module
     participant MQ as RabbitMQ
-    participant CS as Core Server
+    participant CS as Core Server (Key Owner)
     participant TR as Translator Module
     participant IP as Implant Provider
 
-    I->>CH: Beacon / check-in (transport-specific)
-    CH->>MQ: Publish inbound.agent_message
+    I->>CH: Beacon/check-in + encrypted blob
+    CH->>MQ: Publish inbound.agent_message (ids + blob)
     MQ->>CS: Deliver inbound.agent_message
-    CS->>TR: Request decode/normalize
-    TR->>IP: Map to implant/provider schema
+    CS->>CS: Resolve key by implant/session id
+    CS->>CS: Decrypt + verify payload
+    CS->>TR: Pass plaintext message for normalization
+    TR->>IP: Map implant/provider schema
     IP-->>TR: Parsed result + capabilities
     TR-->>CS: Normalized C2 event
     CS->>CS: Persist event + update state
 
     CS->>TR: Build task intent (C2-native)
     TR->>IP: Convert to implant command
-    IP-->>TR: Provider command payload
-    TR-->>CS: Encoded outbound command
-    CS->>MQ: Publish outbound.task
+    IP-->>TR: Provider-specific plaintext command
+    TR-->>CS: Normalized outbound plaintext
+    CS->>CS: Encrypt command for implant/session
+    CS->>MQ: Publish outbound.task (ids + encrypted blob)
     MQ->>CH: Deliver outbound.task
-    CH-->>I: Send task to implant
+    CH-->>I: Deliver encrypted task blob
 
-    I->>CH: Task result / output
-    CH->>MQ: Publish inbound.task_result
+    I->>CH: Encrypted task result blob
+    CH->>MQ: Publish inbound.task_result (ids + blob)
     MQ->>CS: Deliver inbound.task_result
+    CS->>CS: Decrypt + verify result payload
     CS->>TR: Normalize response
     TR-->>CS: C2 result model
     CS->>CS: Persist result + audit log
@@ -57,8 +61,9 @@ flowchart LR
 
 ## Notes
 
-- `Channel` handles transport/session delivery only.
-- `Translator` handles language/model conversion only.
+- `Channel` handles transport/session delivery and routing metadata only.
+- `Channel` does not decrypt or inspect implant plaintext.
+- `Core Server` owns key resolution, decrypt/verify, encrypt/sign, orchestration, policy, persistence, and audit.
+- `Translator` handles language/model conversion after core decrypts payload.
 - `Implant Provider` handles implant family specifics (commands/build/capabilities).
-- `Core Server` owns orchestration, policy, persistence, and audit.
 - All inter-service traffic should carry `message_id` and `correlation_id`.
