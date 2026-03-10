@@ -5,7 +5,7 @@ repo_url: https://github.com/Wooderan/vibe-c2-docs
 repo_name: Wooderan/vibe-c2-docs
 
 theme:
-  name: shadcn
+  name: mkdocs
 
 markdown_extensions:
   - admonition
