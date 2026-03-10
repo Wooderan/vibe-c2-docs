@@ -15,7 +15,7 @@ Channel modules provide transport paths between implants/sessions and the core C
 - Wait for HTTP response from core and relay returned encrypted payload back to implant/session.
 - Implement transport-specific response delivery (`poll`/long-poll/webhook reply/etc.).
 - Load and apply obfuscation profiles (extract/re-embed `id` and `encrypted_data`).
-- Match inbound payloads against multiple enabled profiles and resolve profile selection.
+- Resolve profile selection from transport `profile_id` hint when present; otherwise match against enabled profiles.
 - Persist and manage YAML obfuscation profiles.
 - Expose RabbitMQ RPC management actions for profile CRUD/activation/validation.
 - Maintain usage statistics and source-affinity cache for profile selection optimization.

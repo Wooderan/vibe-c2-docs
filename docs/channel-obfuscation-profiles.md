@@ -19,6 +19,7 @@ A profile may define where and how fields are placed, for example:
 - body fields
 - mixed placement (split across multiple locations)
 
+In addition to `id` and `encrypted_data`, transport may carry `profile_id` hint used for fast profile selection.
 A profile may also define reversible encoding/wrapping, for example:
 
 - base64/base64url variants
@@ -52,6 +53,14 @@ match:
       key: data
 
 mapping:
+  profile_id:
+    source: profile_id
+    target:
+      location: query
+      key: p
+    transform:
+      - type: base64url
+
   id:
     source: id
     target:
@@ -80,17 +89,20 @@ Field notes:
 - `priority`: lower cost / higher confidence profiles should be attempted first.
 - `default_fallback`: exactly one enabled profile per channel should be marked fallback.
 - `match`: pre-filter criteria used to avoid full brute-force over all enabled profiles.
+- `mapping.profile_id`: where to read/write optional profile hint in transport payload.
 
 ## Runtime flow
 
 Inbound (implant/session -> channel -> core):
 
 1. Channel receives obfuscated transport payload.
-2. Channel builds candidate profile list from enabled profiles using `match` pre-filters.
-3. Channel tries candidate profiles in priority/frequency order.
-4. On first successful decode to canonical fields (`id`, `encrypted_data`), channel uses that profile.
-5. If no candidate succeeds, channel tries enabled default fallback profile last.
-6. Channel sends canonical request to C2 sync endpoint.
+2. Channel first attempts to extract `profile_id` hint using configured hint locations.
+3. If hint is valid and points to enabled profile, channel uses that profile directly.
+4. If hint is missing/invalid, channel builds candidate list from enabled profiles using `match` pre-filters.
+5. Channel tries candidates in priority/frequency order.
+6. On first successful decode to canonical fields (`id`, `encrypted_data`), channel uses that profile.
+7. If no candidate succeeds, channel tries enabled default fallback profile last.
+8. Channel sends canonical request to C2 sync endpoint.
 
 Outbound (core -> channel -> implant/session):
 
@@ -124,11 +136,13 @@ Validation on create/update should include overlap checks against other enabled 
 
 - Multiple enabled profiles may accidentally match the same inbound shape.
 - Channel/C2 must reject create/update operations that introduce ambiguous overlap (for same channel + transport).
+- `profile_id` hint must uniquely map to one enabled profile in channel scope.
 - One enabled `default_fallback` profile is required per channel and is used only after all specific profiles fail.
 
 ### Performance control
 
-- Use `match` pre-filters to narrow candidate set before decode attempts.
+- Prefer direct selection via transport `profile_id` hint.
+- Use `match` pre-filters to narrow candidate set before decode attempts when hint is unavailable.
 - Order attempts by observed frequency/success rate.
 - Cache source-to-profile affinity (for example `source_ip -> profile_id`, `telegram_chat_id -> profile_id`) with TTL.
 - On cache hit, try cached profile first; on miss/failure, fall back to ordered candidates.
