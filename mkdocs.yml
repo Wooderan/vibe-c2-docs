@@ -5,11 +5,9 @@ repo_url: https://github.com/Wooderan/vibe-c2-docs
 repo_name: Wooderan/vibe-c2-docs
 
 theme:
-  name: material
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - content.code.copy
+  name: mkdocs
+  color_mode: auto
+  user_color_mode_toggle: true
 
 markdown_extensions:
   - admonition
@@ -21,6 +19,10 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - toc:
       permalink: true
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
+  - js/mermaid-init.js
 
 nav:
   - Home: index.md
