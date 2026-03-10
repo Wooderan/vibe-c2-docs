@@ -35,8 +35,10 @@ sequenceDiagram
 ## Delivery Semantics
 
 - Channel initiates sync when implant/session sends inbound traffic.
+- Inbound transport data is de-obfuscated by channel into canonical fields (`id`, `encrypted_data`).
 - Core always replies with `outbound.agent_message`.
 - Response body exposed to channel is encrypted-only (`encrypted_data`).
+- Channel re-obfuscates canonical response fields using active profile before sending to implant/session.
 - If no work is available, core returns an empty/no-op encrypted payload.
 
 ## Notes

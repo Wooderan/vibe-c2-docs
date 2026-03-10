@@ -4,10 +4,12 @@ This page defines HTTP sync contracts for implant/session communication between 
 
 ## Model
 
-- Implant -> Channel input: only `id` + `encrypted_data`.
+- Canonical channel-core model is only `id` + `encrypted_data`.
+- Implant/channel transport may use obfuscated placement (headers/query/cookies/body/etc.) defined by active profile.
+- Channel normalizes transport payload to canonical form before calling core.
 - Channel sends HTTP request to core: `POST /api/channel/sync`.
 - Core responds with `outbound.agent_message` containing encrypted data.
-- Channel returns response payload to implant/session over its native transport.
+- Channel applies profile mapping for outbound transport response.
 
 ---
 

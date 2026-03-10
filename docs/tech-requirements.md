@@ -40,11 +40,19 @@
 - Channel modules act as transport-only relays and must not own C2 protocol semantics.
 - Core C2 services must resolve key material/context using `id` and perform decrypt/verify.
 
-## FR-07: Auditability
+## FR-07: Channel Obfuscation Profiles
+
+- Channel modules must support multiple obfuscation profiles per channel.
+- Profiles must define mapping/obfuscation rules for `id` and `encrypted_data` in transport fields.
+- Profiles must be persisted in storage as YAML documents.
+- Channel modules must expose RabbitMQ RPC management actions for profile CRUD/activation/validation.
+
+## FR-08: Auditability
 
 - Security-relevant actions must be logged with actor, action, and time.
 - Logs must be queryable for incident investigation.
 - Module-originated actions must be traceable to message IDs/correlation IDs.
+- Obfuscation profile changes must be auditable.
 
 ## Non-Functional Requirements
 

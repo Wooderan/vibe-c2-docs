@@ -14,6 +14,9 @@ Channel modules provide transport paths between implants/sessions and the core C
 - Send inbound HTTP request to core sync endpoint (`POST /api/channel/sync`).
 - Wait for HTTP response from core and relay returned encrypted payload back to implant/session.
 - Implement transport-specific response delivery (`poll`/long-poll/webhook reply/etc.).
+- Load and apply obfuscation profiles (extract/re-embed `id` and `encrypted_data`).
+- Persist and manage YAML obfuscation profiles.
+- Expose RabbitMQ RPC management actions for profile CRUD/activation/validation.
 - Handle transport-specific concerns (sessions, polling cadence, retries, rate limits).
 
 ### Examples
