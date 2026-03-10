@@ -1,21 +1,53 @@
 let mermaidInitialized = false;
 
-async function renderMermaid() {
-  if (!window.mermaid) return;
+function collectMermaidContainers() {
+  const created = [];
 
-  const blocks = document.querySelectorAll('pre code.language-mermaid');
-  blocks.forEach((code, idx) => {
+  // Case 1: superfences outputs <pre class="mermaid"><code>...</code></pre>
+  document.querySelectorAll('pre.mermaid').forEach((pre, idx) => {
+    const code = pre.querySelector('code');
+    const text = code ? code.textContent : pre.textContent;
+    if (!text) return;
+
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.id = `mermaid-pre-${idx}-${Date.now()}`;
+    div.textContent = text;
+    div.dataset.mermaidRendered = '0';
+
+    pre.replaceWith(div);
+    created.push(div);
+  });
+
+  // Case 2: regular fenced code outputs <pre><code class="language-mermaid">...</code></pre>
+  document.querySelectorAll('pre code.language-mermaid').forEach((code, idx) => {
     const pre = code.parentElement;
     if (!pre) return;
 
-    const container = document.createElement('div');
-    container.className = 'mermaid';
-    container.id = `mermaid-${idx}-${Date.now()}`;
-    container.textContent = code.textContent || '';
-    container.dataset.mermaidRendered = '0';
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.id = `mermaid-code-${idx}-${Date.now()}`;
+    div.textContent = code.textContent || '';
+    div.dataset.mermaidRendered = '0';
 
-    pre.replaceWith(container);
+    pre.replaceWith(div);
+    created.push(div);
   });
+
+  // Already-converted containers that still need rendering
+  document
+    .querySelectorAll('.mermaid:not([data-mermaid-rendered="1"])')
+    .forEach((el) => {
+      if (!el.dataset.mermaidRendered) el.dataset.mermaidRendered = '0';
+      created.push(el);
+    });
+
+  // Deduplicate
+  return Array.from(new Set(created));
+}
+
+async function renderMermaid() {
+  if (!window.mermaid) return;
 
   if (!mermaidInitialized) {
     window.mermaid.initialize({
@@ -26,8 +58,8 @@ async function renderMermaid() {
     mermaidInitialized = true;
   }
 
-  const targets = Array.from(
-    document.querySelectorAll('.mermaid[data-mermaid-rendered="0"]')
+  const targets = collectMermaidContainers().filter(
+    (el) => el.dataset.mermaidRendered === '0'
   );
   if (targets.length === 0) return;
 
