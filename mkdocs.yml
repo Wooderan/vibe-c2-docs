@@ -5,11 +5,7 @@ repo_url: https://github.com/Wooderan/vibe-c2-docs
 repo_name: Wooderan/vibe-c2-docs
 
 theme:
-  name: material
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - content.code.copy
+  name: shadcn
 
 markdown_extensions:
   - admonition
