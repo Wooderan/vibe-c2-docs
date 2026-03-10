@@ -4,6 +4,9 @@
 
 Build a reliable, operator-friendly C2 platform with strong observability and security controls.
 
+This project is community-centered.
+Its main purpose is to give anyone the ability to vibe-code modules and vibe-deploy their own infrastructure.
+
 ## In Scope (Phase 1)
 
 - Core server capabilities (auth, orchestration, policy).

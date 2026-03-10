@@ -9,6 +9,15 @@ Use this docs site to:
 - Define product and technical requirements early.
 - Capture architecture decisions before implementation.
 - Track project scope and constraints.
+- Keep the project community-centered and contributor-friendly.
+
+## Community Mission
+
+The project exists to enable people to:
+
+- vibe-code their own modules
+- vibe-deploy their own C2 infrastructure
+- share and improve patterns with the community
 
 ## First Milestones
 
