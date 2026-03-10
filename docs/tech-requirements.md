@@ -42,12 +42,19 @@
 
 ## FR-07: Channel Obfuscation Profiles
 
-- Channel modules must support multiple obfuscation profiles per channel.
+- Channel modules must support multiple enabled obfuscation profiles per channel.
 - Profiles must define mapping/obfuscation rules for `id` and `encrypted_data` in transport fields.
 - Profiles must be persisted in storage as YAML documents.
 - Channel modules must expose RabbitMQ RPC management actions for profile CRUD/activation/validation.
+- Exactly one enabled default fallback profile must exist per channel.
 
-## FR-08: Auditability
+## FR-08: Obfuscation Match Resolution and Performance
+
+- On inbound, channel must select profile by matching enabled profiles and decoding to canonical fields.
+- Profile create/update must validate and reject ambiguous overlap with existing enabled profiles.
+- Channel should optimize profile selection using usage frequency and source-to-profile affinity cache.
+
+## FR-09: Auditability
 
 - Security-relevant actions must be logged with actor, action, and time.
 - Logs must be queryable for incident investigation.

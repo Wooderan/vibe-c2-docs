@@ -39,7 +39,17 @@ A profile may also define reversible encoding/wrapping, for example:
 profile_id: http-profile-01
 channel_type: http
 enabled: true
+default_fallback: false
+priority: 100
 version: 1
+
+match:
+  transport: http
+  required_fields:
+    - location: header
+      key: X-Request-ID
+    - location: body
+      key: data
 
 mapping:
   id:
@@ -64,19 +74,30 @@ mapping:
       value: "20260310"
 ```
 
+Field notes:
+
+- `enabled`: profile participates in inbound matching.
+- `priority`: lower cost / higher confidence profiles should be attempted first.
+- `default_fallback`: exactly one enabled profile per channel should be marked fallback.
+- `match`: pre-filter criteria used to avoid full brute-force over all enabled profiles.
+
 ## Runtime flow
 
 Inbound (implant/session -> channel -> core):
 
 1. Channel receives obfuscated transport payload.
-2. Channel applies active profile to extract canonical fields (`id`, `encrypted_data`).
-3. Channel sends canonical request to C2 sync endpoint.
+2. Channel builds candidate profile list from enabled profiles using `match` pre-filters.
+3. Channel tries candidate profiles in priority/frequency order.
+4. On first successful decode to canonical fields (`id`, `encrypted_data`), channel uses that profile.
+5. If no candidate succeeds, channel tries enabled default fallback profile last.
+6. Channel sends canonical request to C2 sync endpoint.
 
 Outbound (core -> channel -> implant/session):
 
 1. Channel receives canonical response (`outbound.agent_message`).
-2. Channel applies active profile to re-embed/obfuscate transport payload.
+2. Channel uses the inbound-resolved profile (or fallback) to re-embed/obfuscate transport payload.
 3. Channel returns transport-shaped response to implant/session.
+4. Channel updates profile usage counters/cache for future ordering.
 
 ## Management model
 
@@ -91,6 +112,26 @@ Channel modules expose RabbitMQ RPC management endpoints so core can manage prof
 - `obf.profile.delete`
 - `obf.profile.activate`
 - `obf.profile.validate`
+- `obf.profile.simulate_match`
+- `obf.profile.set_default`
+- `obf.profile.stats`
+
+Validation on create/update should include overlap checks against other enabled profiles for the same channel.
+
+## Matching conflict and performance strategy
+
+### Conflict control
+
+- Multiple enabled profiles may accidentally match the same inbound shape.
+- Channel/C2 must reject create/update operations that introduce ambiguous overlap (for same channel + transport).
+- One enabled `default_fallback` profile is required per channel and is used only after all specific profiles fail.
+
+### Performance control
+
+- Use `match` pre-filters to narrow candidate set before decode attempts.
+- Order attempts by observed frequency/success rate.
+- Cache source-to-profile affinity (for example `source_ip -> profile_id`, `telegram_chat_id -> profile_id`) with TTL.
+- On cache hit, try cached profile first; on miss/failure, fall back to ordered candidates.
 
 ## Security boundaries
 
